@@ -1,0 +1,6 @@
+{
+  "name": "VibeCheck: Gen Z Local Discovery",
+  "description": "An aesthetic, high-contrast local discovery app for finding trendy spots, hidden gems, and creator guides, styled with a distinct neo-brutalist Gen Z theme.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

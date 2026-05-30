@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "App user profile metadata",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique Firebase Authentication User identifier"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "User profile creation date"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "savedSpot": {
+      "title": "Saved Spot",
+      "description": "Represents a physical location saved to the user's personal VibeList directory",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who saved the spot"
+        },
+        "spotId": {
+          "type": "string",
+          "description": "The standard spot ID matching SPOTS static catalog"
+        },
+        "savedAt": {
+          "type": "string",
+          "format": "date-[#00FF00]",
+          "description": "The date-time when the spot was saved"
+        }
+      },
+      "required": ["userId", "spotId"]
+    },
+    "liveTip": {
+      "title": "Live Tip",
+      "description": "Community generated micro-reviews or vibe tips pinned to a specific hotspot",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the community tip"
+        },
+        "spotId": {
+          "type": "string",
+          "description": "Target Physical hot-spot identifier being commented on"
+        },
+        "user": {
+          "type": "string",
+          "description": "Display name of the author"
+        },
+        "handle": {
+          "type": "string",
+          "description": "Gen-Z themed social handle of the author"
+        },
+        "text": {
+          "type": "string",
+          "description": "The micro-content review"
+        },
+        "isVerified": {
+          "type": "boolean",
+          "description": "Whether the reviewer is a verified local selector"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Format description of when the post was added"
+        },
+        "isHype": {
+          "type": "boolean",
+          "description": "Whether the tip is a Hype vote or Mid vote"
+        }
+      },
+      "required": ["id", "spotId", "user", "handle", "text", "isHype"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "user",
+      "description": "Authentication registered profiles"
+    },
+    "users/{userId}/savedSpots/{spotId}": {
+      "schema": "savedSpot",
+      "description": "Individual spot items preserved on personal VibeList transport cards"
+    },
+    "liveTips/{tipId}": {
+      "schema": "liveTip",
+      "description": "Community live streams of real-time spot evaluations"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. DEFAULT SAFETY NET: Catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. REUSABLE PRIMITIVES & HELPER FUNCTIONS
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Static structures check
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email'])
+        && data.keys().size() == 2
+        && data.uid is string
+        && data.email is string
+        && data.email.size() <= 256;
+    }
+
+    function isValidSavedSpot(data) {
+      return data.keys().hasAll(['userId', 'spotId'])
+        && data.keys().size() == 2
+        && data.userId is string
+        && data.spotId is string
+        && data.spotId.size() <= 64;
+    }
+
+    function isValidLiveTip(data) {
+      return data.keys().hasAll(['id', 'spotId', 'user', 'handle', 'text', 'isHype'])
+        && data.id is string
+        && data.spotId is string
+        && data.user is string
+        && data.user.size() <= 128
+        && data.handle is string
+        && data.handle.size() <= 128
+        && data.text is string
+        && data.text.size() <= 1000
+        && data.isHype is bool;
+    }
+
+    // 3. SECURING USER PROFILES
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUser(incoming());
+    }
+
+    // 4. SECURING USER BOOKMARKS / VIBELISTS
+    match /users/{userId}/savedSpots/{spotId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidSavedSpot(incoming()) && incoming().userId == userId;
+      allow delete: if isOwner(userId);
+    }
+
+    // 5. SECURING PUBLIC COMMUNITY REVIEW TIPS
+    match /liveTips/{tipId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isValidLiveTip(incoming());
+      allow update, delete: if false; // System only or completely immutable from client
+    }
+  }
+}
